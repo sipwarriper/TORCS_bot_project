@@ -14,6 +14,7 @@ public class DeadSimpleSoloController extends Controller {
 
 
     public Action control(SensorModel sensorModel) {
+
         Action action = new Action ();
         if (sensorModel.getSpeed () < targetSpeed) {
             action.accelerate = 1;
