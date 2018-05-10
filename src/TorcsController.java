@@ -1,5 +1,5 @@
 package scr;
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -21,7 +21,7 @@ public class TorcsController extends Controller {
     static List<Record> registry = new ArrayList<>();
     final String registryFileName = "Registre.torc";
 
-    class Record{
+    class Record implements Serializable{
         public double Speed;
         public double AngleToTrackAxis;
         public double[] TrackEdgeSensors;
@@ -131,8 +131,25 @@ public class TorcsController extends Controller {
 	}
 
 	private void dumpFile(){
-        File file = new File(registryFileName);
-        registry.toString();
+        try {
+            FileOutputStream fos = new FileOutputStream(registryFileName);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(registry);
+            oos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getFromFile(){
+        try {
+            FileInputStream fis = new FileInputStream(registryFileName);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            registry = (List<Record>) ois.readObject();
+            ois.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 	public void shutdown() {
