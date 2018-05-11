@@ -10,40 +10,30 @@ import java.util.*;
 
  */
 
-public class TorcsController extends Controller {
+class recordaci implements Serializable{
 
-    final double targetSpeed = 30;
-    final double targetSteering = 0.25;
-    final double targetTrackPos = 0.05;
-    final double targetSteering2 = 0.1;
-    final int samplingDistance = 5;
-    static double dist=0;
-    static List<Record> registry = new ArrayList<>();
-    final String registryFileName = "Registre.torc";
+    public Integer Speed;
+    public double AngleToTrackAxis;
+    public double[] TrackEdgeSensors;
+    public double[] FocusSensors;//ML
+    public double TrackPosition;
+    public int Gear;
+    public double[] OpponentSensors;
+    public int RacePosition;
+    public double LateralSpeed;
+    public double CurrentLapTime;
+    public double Damage;
+    public double DistanceFromStartLine;
+    public double DistanceRaced;
+    public double FuelLevel;
+    public double LastLapTime;
+    public double RPM;
+    public double[] WheelSpinVelocity;
+    public double ZSpeed;
+    public double Z;
 
-    class Record implements Serializable{
-        public double Speed;
-        public double AngleToTrackAxis;
-        public double[] TrackEdgeSensors;
-        public double[] FocusSensors;//ML
-        public double TrackPosition;
-        public int Gear;
-        public double[] OpponentSensors;
-        public int RacePosition;
-        public double LateralSpeed;
-        public double CurrentLapTime;
-        public double Damage;
-        public double DistanceFromStartLine;
-        public double DistanceRaced;
-        public double FuelLevel;
-        public double LastLapTime;
-        public double RPM;
-        public double[] WheelSpinVelocity;
-        public double ZSpeed;
-        public double Z;
-
-        public Record(SensorModel sensor){
-            Speed = sensor.getSpeed();
+    public recordaci(SensorModel sensor){
+            Speed = new Double(sensor.getSpeed()).intValue();
             AngleToTrackAxis = sensor.getAngleToTrackAxis();
             TrackEdgeSensors = sensor.getTrackEdgeSensors();
             FocusSensors = sensor.getFocusSensors();
@@ -62,8 +52,19 @@ public class TorcsController extends Controller {
             WheelSpinVelocity = sensor.getWheelSpinVelocity();
             this.ZSpeed = sensor.getZSpeed();
             Z = sensor.getZ();
-        }
     }
+}
+
+public class TorcsController extends Controller {
+
+    final double targetSpeed = 30;
+    final double targetSteering = 0.25;
+    final double targetTrackPos = 0.05;
+    final double targetSteering2 = 0.1;
+    final int samplingDistance = 5;
+    static double dist=0;
+    static List<recordaci> registry = new ArrayList<>();
+    final String registryFileName = "Registre.torc";
 
     public Action control(SensorModel sensorModel) {
 
@@ -74,7 +75,7 @@ public class TorcsController extends Controller {
         if(dist > distanceFromStart) dist = distanceFromStart; //la distancia des de la linia de sortida no creix sempre.
 
         if(distanceFromStart > dist + samplingDistance){
-            registry.add(new Record(sensorModel));
+            registry.add(new recordaci(sensorModel));
             System.out.println("Registre guardat. Distancia recorreguda: " + dist + " " + distanceFromStart);
             dist = distanceFromStart;
         }
@@ -135,6 +136,10 @@ public class TorcsController extends Controller {
             FileOutputStream fos = new FileOutputStream(registryFileName);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(registry);
+            /*Integer test=123;
+            oos.writeObject(registry.get(0));
+            oos.writeObject(new seriable());
+            registry.get(0);*/
             oos.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,7 +150,7 @@ public class TorcsController extends Controller {
         try {
             FileInputStream fis = new FileInputStream(registryFileName);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            registry = (List<Record>) ois.readObject();
+            registry = (List<recordaci>) ois.readObject();
             ois.close();
         } catch (Exception e) {
             e.printStackTrace();
