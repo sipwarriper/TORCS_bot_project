@@ -1,6 +1,7 @@
 package scr;
-import java.io.*;
-import java.util.*;
+import java.io.*; //Aquest * l'ha posat l'IDE amb alt + enter aixi que entenc que és segur
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -10,7 +11,7 @@ import java.util.*;
 
  */
 
-class recordaci implements Serializable{
+class Record implements Serializable {
 
     public Integer Speed;
     public double AngleToTrackAxis;
@@ -32,7 +33,7 @@ class recordaci implements Serializable{
     public double ZSpeed;
     public double Z;
 
-    public recordaci(SensorModel sensor){
+    public Record(SensorModel sensor){
             Speed = new Double(sensor.getSpeed()).intValue();
             AngleToTrackAxis = sensor.getAngleToTrackAxis();
             TrackEdgeSensors = sensor.getTrackEdgeSensors();
@@ -58,12 +59,12 @@ class recordaci implements Serializable{
 public class TorcsController extends Controller {
 
     final double targetSpeed = 30;
-    final double targetSteering = 0.25;
+    final double targetSteering = 0.15;
     final double targetTrackPos = 0.05;
     final double targetSteering2 = 0.1;
     final int samplingDistance = 5;
     static double dist=0;
-    static List<recordaci> registry = new ArrayList<>();
+    static List<Record> registry = new ArrayList<>();
     final String registryFileName = "Registre.torc";
 
     public Action control(SensorModel sensorModel) {
@@ -75,7 +76,7 @@ public class TorcsController extends Controller {
         if(dist > distanceFromStart) dist = distanceFromStart; //la distancia des de la linia de sortida no creix sempre.
 
         if(distanceFromStart > dist + samplingDistance){
-            registry.add(new recordaci(sensorModel));
+            registry.add(new Record(sensorModel));
             System.out.println("Registre guardat. Distancia recorreguda: " + dist + " " + distanceFromStart);
             dist = distanceFromStart;
         }
@@ -150,7 +151,7 @@ public class TorcsController extends Controller {
         try {
             FileInputStream fis = new FileInputStream(registryFileName);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            registry = (List<recordaci>) ois.readObject();
+            registry = (List<Record>) ois.readObject();
             ois.close();
         } catch (Exception e) {
             e.printStackTrace();
