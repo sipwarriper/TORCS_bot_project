@@ -59,7 +59,7 @@ class Record implements Serializable {
 public class TorcsController extends Controller {
 
     final double targetSpeed = 30;
-    final double targetSteering = 0.15;
+    final double targetSteering = 0.25;
     final double targetTrackPos = 0.05;
     final double targetSteering2 = 0.1;
     final int samplingDistance = 5;
