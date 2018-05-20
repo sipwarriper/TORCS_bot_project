@@ -5,29 +5,23 @@ import java.util.List;
 
 public class TorcsController extends Controller {
 
-    final double targetSpeed = 30;
+    final double targetSpeed = 32;
     final double targetSteering = 0.25;
-    final double targetTrackPos = 0.05;
-    final double targetSteering2 = 0.1;
-    final int samplingDistance = 5;
+    final double targetTrackPos = 0.1;
+    final double targetSteering2 = 0.2;
+    final int samplingDistance = 1;
     static double dist=0;
     static List<Record> registry = new ArrayList<>();
     final String registryFileName = "Registre.torc";
 
     public Action control(SensorModel sensorModel) {
 
-        double distanceFromStart = sensorModel.getDistanceFromStartLine();
+       /* double distanceFromStart = sensorModel.getDistanceFromStartLine();
 
         if(dist == 0) dist = distanceFromStart;
 
         if(dist > distanceFromStart) dist = distanceFromStart; //la distancia des de la linia de sortida no creix sempre.
-
-        if(distanceFromStart > dist + samplingDistance){
-            registry.add(new Record(sensorModel));
-            System.out.println("Registre guardat. Distancia recorreguda: " + dist + " " + distanceFromStart);
-            dist = distanceFromStart;
-        }
-
+        */
         Action action = new Action ();
 
         if (sensorModel.getSpeed () < targetSpeed) {
@@ -54,6 +48,12 @@ public class TorcsController extends Controller {
         }
 
         action.gear = 2;
+
+        //if(distanceFromStart > dist + samplingDistance){
+            registry.add(new Record(sensorModel,action));
+            //System.out.println("Registre guardat. Distancia recorreguda: " + dist + " " + distanceFromStart);
+           // dist = distanceFromStart;
+       // }
 
         return action;
     }

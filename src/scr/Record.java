@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 public class Record implements Serializable {
 
-    public Integer Speed;
+   /* public Integer Speed;
     public double AngleToTrackAxis;
     public double[] TrackEdgeSensors;
     public double[] FocusSensors;//ML
@@ -22,18 +22,19 @@ public class Record implements Serializable {
     public int RacePosition;
     public double LateralSpeed;
     public double CurrentLapTime;
-    public double Damage;
+    public double Damage;*/
     public double DistanceFromStartLine;
-    public double DistanceRaced;
+    public double steering;
+    /*public double DistanceRaced;
     public double FuelLevel;
     public double LastLapTime;
     public double RPM;
     public double[] WheelSpinVelocity;
     public double ZSpeed;
-    public double Z;
+    public double Z;*/
 
-    public Record(SensorModel sensor){
-            Speed = new Double(sensor.getSpeed()).intValue();
+    public Record(SensorModel sensor, Action action){
+            /*Speed = new Double(sensor.getSpeed()).intValue();
             AngleToTrackAxis = sensor.getAngleToTrackAxis();
             TrackEdgeSensors = sensor.getTrackEdgeSensors();
             FocusSensors = sensor.getFocusSensors();
@@ -43,14 +44,15 @@ public class Record implements Serializable {
             RacePosition = sensor.getRacePosition();
             LateralSpeed = sensor.getLateralSpeed();
             CurrentLapTime = sensor.getCurrentLapTime();
-            Damage = sensor.getDamage();
+            Damage = sensor.getDamage();*/
             DistanceFromStartLine = sensor.getDistanceFromStartLine();
-            DistanceRaced = sensor.getDistanceRaced();
+            steering = action.steering;
+            /*DistanceRaced = sensor.getDistanceRaced();
             FuelLevel = sensor.getFuelLevel();
             LastLapTime = sensor.getLastLapTime();
             this.RPM = sensor.getRPM();
             WheelSpinVelocity = sensor.getWheelSpinVelocity();
             this.ZSpeed = sensor.getZSpeed();
-            Z = sensor.getZ();
+            Z = sensor.getZ();*/
     }
 }
