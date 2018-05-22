@@ -12,9 +12,9 @@ import java.io.Serializable;
 
 public class Record implements Serializable {
 
-   /* public Integer Speed;
+    //public Integer Speed;
     public double AngleToTrackAxis;
-    public double[] TrackEdgeSensors;
+   /* public double[] TrackEdgeSensors;
     public double[] FocusSensors;//ML
     public double TrackPosition;
     public int Gear;
@@ -34,9 +34,9 @@ public class Record implements Serializable {
     public double Z;*/
 
     public Record(SensorModel sensor, Action action){
-            /*Speed = new Double(sensor.getSpeed()).intValue();
+            //Speed = new Double(sensor.getSpeed()).intValue();
             AngleToTrackAxis = sensor.getAngleToTrackAxis();
-            TrackEdgeSensors = sensor.getTrackEdgeSensors();
+            /*TrackEdgeSensors = sensor.getTrackEdgeSensors();
             FocusSensors = sensor.getFocusSensors();
             TrackPosition = sensor.getTrackPosition();
             Gear = sensor.getGear();
