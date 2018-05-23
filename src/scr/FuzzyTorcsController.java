@@ -7,7 +7,6 @@ import java.util.List;
 
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
-import sun.nio.cs.ext.MacThai;
 
 public class FuzzyTorcsController extends Controller {
 

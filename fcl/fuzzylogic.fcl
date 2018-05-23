@@ -66,14 +66,14 @@ FUZZIFY distNextTurn // Fuzzify input variable 'distNextTurn': {far, near, close
 END_FUZZIFY
 
 FUZZIFY angle			// Fuzzify input variable 'angle': { 'open' , 'medium' , 'closed' }
-	TERM open := (0, 0) (0.15, 1) (0.25, 1) (0.5, 0);
+	TERM open := (0,1) (0.15, 1) (0.25, 1) (0.5, 0);
 	TERM medium := (0.25, 0) (0.5, 1) (0.75, 1) (0.85,0);
 	TERM closed := (0.75, 0) (0.85, 1) (1.25, 1);
 END_FUZZIFY
 
 FUZZIFY currentTurn			// Fuzzify input variable 'angle': { 'straight' , 'open' , 'medium' , 'closed' }  //de 0 a 1.25
     TERM straight := (0, 1) (0.05, 0);
-	TERM open := (0.05, 0) (0.15, 1) (0.25, 1) (0.5, 0);
+	TERM open := (0, 0) (0.15, 1) (0.25, 1) (0.5, 0);
 	TERM medium := (0.25, 0) (0.5, 1) (0.75, 1) (0.85,0);
 	TERM closed := (0.75, 0) (0.85, 1) (1.25, 1);
 END_FUZZIFY
@@ -100,9 +100,18 @@ RULEBLOCK No1
 	ACT : MIN;			// Use 'min' activation method
 	ACCU : MAX;			// Use 'max' accumulation method
 
+    RULE 1 : IF speed IS stopped THEN accel IS hardAccel;
+	RULE 2 : IF speed IS slow AND currentTurn IS closed THEN accel IS nothing; //si la curva que ve és tancada mantenim lent
+	RULE 3 : IF speed IS slow AND currentTurn IS NOT closed THEN accel IS hardAccel;
+	RULE 4 : IF speed IS average AND currentTurn IS closed THEN accel IS softBrake;
+	RULE 5 : IF speed IS average AND currentTurn IS medium THEN accel IS softAccel;
+	RULE 6 : IF speed IS average AND currentTurn IS open THEN accel IS hardAccel;
+
+/*
+
 	RULE 1 : IF speed IS stopped THEN accel IS hardAccel;
 	RULE 2 : IF speed IS slow AND currentTurn IS closed THEN accel IS nothing;
-	RULE 3 : IF speed IS slow AND currentTurn IS medium AND distNextTurn IS NOT close THEN accel IS hardAccel;
+    RULE 3 : IF speed IS slow AND currentTurn IS medium AND distNextTurn IS NOT close THEN accel IS hardAccel;
 	RULE 4 : IF speed IS slow AND currentTurn IS NOT closed AND distNextTurn IS close AND angle IS NOT closed THEN accel IS hardAccel; //revisar angle is medium
 	RULE 5 : IF speed IS slow AND currentTurn IS NOT closed AND distNextTurn IS close AND angle IS closed THEN accel IS softAccel; //canviar en funcio de comportament
 	RULE 6 : IF speed IS average AND currentTurn IS closed THEN accel IS softBrake;
@@ -113,6 +122,8 @@ RULEBLOCK No1
 	RULE 11 : IF speed IS fast AND currentTurn IS NOT straight AND distNextTurn IS far THEN accel IS softAccel;
 	RULE 12 : IF speed IS fast AND currentTurn IS straight AND distNextTurn IS NOT close THEN accel IS hardAccel;
 	RULE 13 : IF speed IS fast AND distNextTurn IS NOT close AND angle IS closed THEN accel IS hardBrake;
+
+	*/
 
 
 
