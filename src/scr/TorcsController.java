@@ -1,9 +1,13 @@
 package scr;
 import java.io.*; //Aquest * l'ha posat l'IDE amb alt + enter aixi que entenc que és segur
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TorcsController extends Controller {
+
+    public static int M = 25; //Aproximadament un registre cada 5 metres
+    public static int X = 5;
 
     final double targetSpeed = 32;
     final double targetSteering = 0.25;
@@ -13,6 +17,9 @@ public class TorcsController extends Controller {
     static double dist=0;
     static List<Record> registry = new ArrayList<>();
     final String registryFileName = "Registre.torc";
+
+    List<Record> mean_vector = new ArrayList<>();
+    List<Record> accumulated_vector = new ArrayList<>();
 
     public Action control(SensorModel sensorModel) {
 
@@ -79,19 +86,69 @@ public class TorcsController extends Controller {
 		System.out.println("Restarting the race!");
 	}
 
-	private void dumpFile(){
+	private void dumpFile(String nomFitxer){
         try {
-            FileOutputStream fos = new FileOutputStream(registryFileName);
+            FileOutputStream fos = new FileOutputStream(nomFitxer);
+            PrintWriter out = new PrintWriter(nomFitxer+"v");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(registry);
-            /*Integer test=123;
-            oos.writeObject(registry.get(0));
-            oos.writeObject(new seriable());
-            registry.get(0);*/
             oos.close();
+
+            for(Record r: registry){
+                out.println("[{Angle: " + String.valueOf(r.AngleToTrackAxis) + "}"
+                        + "{DistRaced: " + String.valueOf(r.DistanceRaced) + "}"
+                        + "{DistanceFromStartLine: " + String.valueOf(r.DistanceFromStartLine) + "}"
+                        + "{Steering: " + String.valueOf(r.steering) + "}]");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void normalize(List<Record> registry) {
+        double min=Double.POSITIVE_INFINITY, max=Double.NEGATIVE_INFINITY;
+        for(Record r: registry){
+            if(min > r.AngleToTrackAxis) min = r.AngleToTrackAxis;
+            if(max < r.AngleToTrackAxis) max = r.AngleToTrackAxis;
+        }
+        for(Record r: registry){
+            if(r.AngleToTrackAxis > 0) r.AngleToTrackAxis = r.AngleToTrackAxis/max;
+            else r.AngleToTrackAxis = r.AngleToTrackAxis/(-min); //-min per deixar el valor en negatiu
+        }
+    }
+
+    private List<Record> getMeanVector(List<Record> registry) {
+        List<Record> rl = new ArrayList<>();
+        Iterator<Record> it = registry.iterator();
+        while(it.hasNext()){
+            int i = 0;
+            Record r = new Record();
+            while(i<M && it.hasNext()){
+                r.addValues(it.next());
+                i++;
+            }
+            r.divideValues(M);
+            rl.add(r);
+        }
+
+        return rl;
+    }
+
+    private List<Record> getAccumulatedVector(List<Record> registry) {
+        List<Record> rl = new ArrayList<>();
+        Iterator<Record> it = registry.iterator();
+        while(it.hasNext()){
+            int i = 0;
+            Record r = new Record();
+            while(i<X && it.hasNext()){
+                r.addValues(it.next());
+                i++;
+            }
+            rl.add(r);
+        }
+
+        return rl;
     }
 
     private void getFromFile(){
@@ -105,8 +162,8 @@ public class TorcsController extends Controller {
         }
     }
 
-	public void shutdown() {
+    public void shutdown() {
 		System.out.println("Volcant tota la RAM");
-        dumpFile();
+        dumpFile(registryFileName);
 	}
 }
