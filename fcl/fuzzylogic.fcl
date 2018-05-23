@@ -71,11 +71,11 @@ FUZZIFY angle			// Fuzzify input variable 'angle': { 'open' , 'medium' , 'closed
 	TERM closed := (0, 0) (0.0001, 1) (1, 1);
 END_FUZZIFY
 
-FUZZIFY currentTurn			// Fuzzify input variable 'angle': { 'straight' , 'open' , 'medium' , 'closed' }
-    TERM straight := (0,1) (0.01, 0);
-	TERM open := (0, 0) (0.0001, 1) (1, 1);
-	TERM medium := (0, 0) (0.0001, 1) (1, 1);
-	TERM closed := (0, 0) (0.0001, 1) (1, 1);
+FUZZIFY currentTurn			// Fuzzify input variable 'angle': { 'straight' , 'open' , 'medium' , 'closed' }  //de 0 a 1.25
+    TERM straight := (0, 1) (0.05, 0);
+	TERM open := (0.05, 0) (0.15, 1) (0.25, 1) (0.5, 0);
+	TERM medium := (0.25, 0) (0.5, 1) (0.75, 1) (0.85,0);
+	TERM closed := (0.75, 0) (0.85, 1) (1.25, 1);
 END_FUZZIFY
 
 FUZZIFY speed			// Fuzzify input variable 'speed': { 'stopped' , 'slow' , 'average' , 'fast' }

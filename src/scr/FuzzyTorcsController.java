@@ -1,7 +1,6 @@
 package scr;
 
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,8 +18,8 @@ public class FuzzyTorcsController extends Controller {
     final int samplingDistance = 5;*/
     static List<Record> registry = getFromFile("Registre.torc");
 
-    List<Record> mean_vector = new ArrayList<>();
-    List<Record> accumulated_vector = new ArrayList<>();
+    static List<Record> mean_vector;
+    static List<Record> accumulated_vector;
 
     public Action control(SensorModel sensorModel) {
 
@@ -50,11 +49,11 @@ public class FuzzyTorcsController extends Controller {
         gearBlock.setVariable("rpm", sensorModel.getRPM());
         gearBlock.setVariable("accelerate", action.accelerate);
 
-        /*FunctionBlock acceleration = fis.getFunctionBlock("acceleration");
+        FunctionBlock acceleration = fis.getFunctionBlock("acceleration");
         acceleration.setVariable("distNextTurn", );
         acceleration.setVariable("angle", );
-        acceleration.setVariable("speed", );
-        acceleration.setVariable("currentTurn", );*/
+        acceleration.setVariable("speed", sensorModel.getSpeed());
+        acceleration.setVariable("currentTurn", );
 
         // Evaluate
         gearBlock.evaluate();
@@ -71,6 +70,16 @@ public class FuzzyTorcsController extends Controller {
         return action;
     }
 
+    private Record getNextTurn(SensorModel sensorModel){
+
+        double dist = sensorModel.getDistanceFromStartLine();
+        
+
+    }
+
+
+
+
     static private List<Record> getFromFile(String filename){
         List<Record> read_registry = null;
 
@@ -83,6 +92,12 @@ public class FuzzyTorcsController extends Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        correctVector(read_registry, 150);
+        mean_vector = getMeanVector(read_registry);
+        dumpFile(mean_vector, "testing1.txt");
+        accumulated_vector = getAccumulatedVector(mean_vector);
+        dumpFile(accumulated_vector, "testing2.txt");
+        System.out.println("Fitxers creats");
 
         return read_registry;
     }
@@ -115,7 +130,7 @@ public class FuzzyTorcsController extends Controller {
 
         return steering;
     }
-    private void normalize(List<Record> registry) {
+    static void normalize(List<Record> registry) {
         double min=Double.POSITIVE_INFINITY, max=Double.NEGATIVE_INFINITY;
         for(Record r: registry){
             if(min > r.AngleToTrackAxis) min = r.AngleToTrackAxis;
@@ -127,7 +142,7 @@ public class FuzzyTorcsController extends Controller {
         }
     }
 
-    private List<Record> getMeanVector(List<Record> registry) {
+    static private List<Record> getMeanVector(List<Record> registry) {
         List<Record> rl = new ArrayList<>();
         Iterator<Record> it = registry.iterator();
         while(it.hasNext()){
@@ -144,7 +159,7 @@ public class FuzzyTorcsController extends Controller {
         return rl;
     }
 
-    private List<Record> getAccumulatedVector(List<Record> registry) {
+    static List<Record> getAccumulatedVector(List<Record> registry) {
         List<Record> rl = new ArrayList<>();
         Iterator<Record> it = registry.iterator();
         while(it.hasNext()){
@@ -161,7 +176,7 @@ public class FuzzyTorcsController extends Controller {
     }
 
     //aquest metode fica a 0 els valors de angle i steering del vector dels 'dist' primers metres (errors de mesura)
-    private void correctVector(List<Record> l, double dist){
+    static private void correctVector(List<Record> l, double dist){
         Iterator<Record> it = l.iterator();
         Record r = it.next();
         while(it.hasNext() && ( r.DistanceRaced < dist) ){
@@ -169,6 +184,28 @@ public class FuzzyTorcsController extends Controller {
             r.AngleToTrackAxis = 0;
             r = it.next();
         }
+    }
+
+    static void dumpFile(List<Record> registry, String nomFitxer){
+        try {
+            FileOutputStream fos = new FileOutputStream(nomFitxer);
+            PrintWriter out = new PrintWriter(nomFitxer+"v");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(registry);
+            oos.close();
+
+            for(Record r: registry){
+                out.println("[{Angle: " + String.valueOf(r.AngleToTrackAxis) + "}"
+                        + "{DistRaced: " + String.valueOf(r.DistanceRaced) + "}"
+                        + "{DistanceFromStartLine: " + String.valueOf(r.DistanceFromStartLine) + "}"
+                        + "{Steering: " + String.valueOf(r.steering) + "}]");
+            }
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void reset() {

@@ -12,6 +12,8 @@ import java.io.Serializable;
 
 public class Record implements Serializable {
 
+    public final long serialVersionUID = 1L;
+
     //public Integer Speed;
     public double AngleToTrackAxis;
    /* public double[] TrackEdgeSensors;
@@ -65,9 +67,9 @@ public class Record implements Serializable {
 
     public void addValues(Record r) {
         this.AngleToTrackAxis += r.AngleToTrackAxis;
-        this.DistanceRaced += r.DistanceRaced;
+        if(this.DistanceRaced == 0) this.DistanceRaced = r.DistanceRaced;
         this.steering += r.steering;
-        this.DistanceFromStartLine += r.DistanceFromStartLine;
+        if(this.DistanceFromStartLine == 0) this.DistanceFromStartLine = r.DistanceFromStartLine;
     }
 
     public void divideValues(double factor){
