@@ -7,6 +7,7 @@ import java.util.List;
 
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
+import sun.nio.cs.ext.MacThai;
 
 public class FuzzyTorcsController extends Controller {
 
@@ -34,38 +35,57 @@ public class FuzzyTorcsController extends Controller {
             return null;
         }
 
-        if(sensorModel.getDistanceRaced()<400){
+        /*if(sensorModel.getDistanceRaced()<400){
             action.accelerate=1;
         }
         else{
             action.accelerate=0;
             action.brake=0.5;
-        }
+        }*/
 
-        action.steering = girar_temporal(sensorModel); //steering temporal sense fuzzy
+//        action.steering = girar_temporal(sensorModel); //steering temporal sense fuzzy
+
+
+        FunctionBlock acceleration = fis.getFunctionBlock("acceleration");
+        Record nextTurn = getNextTurn(sensorModel);
+        double dist, steering;
+        if (nextTurn== null) {
+            dist =0; steering = 0;
+        }
+        else{
+            dist = (nextTurn.DistanceFromStartLine - sensorModel.getDistanceFromStartLine());
+            steering =  nextTurn.steering;
+        }
+        acceleration.setVariable("distNextTurn", dist);
+        acceleration.setVariable("angle", steering);
+        acceleration.setVariable("speed", sensorModel.getSpeed());
+        Record currentTurn = accumulated_vector.get((int)sensorModel.getDistanceFromStartLine()/25);
+        acceleration.setVariable("currentTurn", currentTurn.steering);
+
+        acceleration.evaluate();
+
+
+        double accel = acceleration.getVariable("accel").getValue();
+        if(accel < 0) {
+            action.brake = -accel;
+            action.accelerate = 0;
+        }
+        else{
+            action.accelerate = accel;
+            action.brake = 0;
+        }
 
         // Set Variables
         FunctionBlock gearBlock = fis.getFunctionBlock("gear");
         gearBlock.setVariable("rpm", sensorModel.getRPM());
         gearBlock.setVariable("accelerate", action.accelerate);
-
-        FunctionBlock acceleration = fis.getFunctionBlock("acceleration");
-        acceleration.setVariable("distNextTurn", );
-        acceleration.setVariable("angle", );
-        acceleration.setVariable("speed", sensorModel.getSpeed());
-        acceleration.setVariable("currentTurn", );
-
-        // Evaluate
         gearBlock.evaluate();
 
         int gear = (int) gearBlock.getVariable("outgear").getValue();
         /*if(!(sensorModel.getGear() == 1 && gear == -1))*/
         action.gear = sensorModel.getGear() + gear;
         if(action.gear == 0) action.gear = 1;
-
-        /*double accel = acceleration.getVariable("accel").getValue();
-        if(accel < 0) action.brake = -accel;
-        else action.accelerate = accel;*/
+        else if (action.gear > 6) action.gear = 6;
 
         return action;
     }
@@ -73,12 +93,19 @@ public class FuzzyTorcsController extends Controller {
     private Record getNextTurn(SensorModel sensorModel){
 
         double dist = sensorModel.getDistanceFromStartLine();
-        
+        int index = (int) dist/25;
+        System.out.println(("index= "+index));
+        Record r = null;
+        for (int i = index+1; i < accumulated_vector.size(); i++){
+            if(Math.abs(accumulated_vector.get(i).steering) > 0.01){
+                //System.out.println(i);
+                r = accumulated_vector.get(i);
+                break;
+            }
+        }
+        return r;
 
     }
-
-
-
 
     static private List<Record> getFromFile(String filename){
         List<Record> read_registry = null;
@@ -130,6 +157,7 @@ public class FuzzyTorcsController extends Controller {
 
         return steering;
     }
+
     static void normalize(List<Record> registry) {
         double min=Double.POSITIVE_INFINITY, max=Double.NEGATIVE_INFINITY;
         for(Record r: registry){
@@ -184,6 +212,15 @@ public class FuzzyTorcsController extends Controller {
             r.AngleToTrackAxis = 0;
             r = it.next();
         }
+        it = l.iterator();
+        r=it.next();
+        List<Record> r1 = new ArrayList<>();
+        while(it.hasNext() && (r.DistanceFromStartLine > 1)){
+            r1.add(r);
+            r = it.next();
+        }
+        l.removeAll(r1);
+        l.addAll(r1);
     }
 
     static void dumpFile(List<Record> registry, String nomFitxer){

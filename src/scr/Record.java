@@ -73,8 +73,8 @@ public class Record implements Serializable {
     }
 
     public void divideValues(double factor){
-        this.DistanceFromStartLine /= factor;
-        this.DistanceRaced /= factor;
+        //this.DistanceFromStartLine /= factor;
+        //this.DistanceRaced /= factor;
         this.steering /= factor;
         this.AngleToTrackAxis /= factor;
     }
