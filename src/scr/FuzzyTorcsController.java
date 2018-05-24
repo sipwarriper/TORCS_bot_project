@@ -7,7 +7,6 @@ import java.util.List;
 
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
-import sun.nio.cs.ext.MacThai;
 
 public class FuzzyTorcsController extends Controller {
 
@@ -54,18 +53,22 @@ public class FuzzyTorcsController extends Controller {
         }
         else{
             dist = (nextTurn.DistanceFromStartLine - sensorModel.getDistanceFromStartLine());
-            steering =  nextTurn.steering;
+            if(dist < 0) dist = 1000;
+            steering =  Math.abs(nextTurn.steering);
         }
         acceleration.setVariable("distNextTurn", dist);
         acceleration.setVariable("angle", steering);
         acceleration.setVariable("speed", sensorModel.getSpeed());
         Record currentTurn = accumulated_vector.get((int)sensorModel.getDistanceFromStartLine()/25);
-        acceleration.setVariable("currentTurn", currentTurn.steering);
+        acceleration.setVariable("currentTurn", Math.abs(currentTurn.steering));
 
         acceleration.evaluate();
 
-
         double accel = acceleration.getVariable("accel").getValue();
+
+
+        System.out.println("steering = " + steering + "distancia a la seguent curva = "+dist + "  Acceleració = " + accel + "  Veloctiat = " + sensorModel.getSpeed() ) ;
+
         if(accel < 0) {
             action.brake = -accel;
             action.accelerate = 0;
@@ -94,7 +97,7 @@ public class FuzzyTorcsController extends Controller {
 
         double dist = sensorModel.getDistanceFromStartLine();
         int index = (int) dist/25;
-        System.out.println(("index= "+index));
+//        System.out.println(("index= "+index));
         Record r = null;
         for (int i = index+1; i < accumulated_vector.size(); i++){
             if(Math.abs(accumulated_vector.get(i).steering) > 0.01){
