@@ -104,7 +104,7 @@ RULEBLOCK No1
 
 	RULE 1 : IF speed IS stopped THEN accel IS fullAccel;
 
-	//màxima prioritat si la proxima curva està aprop!!
+	//màxima prioritat si la proxima corba està aprop!!
 
 	RULE 2 : IF distNextTurn IS close AND angle IS closed AND speed IS fast THEN accel IS fullBrake;
 	RULE 3 : IF distNextTurn IS close AND angle IS closed AND speed IS average THEN accel IS hardBrake;
@@ -147,7 +147,7 @@ RULEBLOCK No1
 
 /*
     RULE 1 : IF speed IS stopped THEN accel IS fullAccel;
-	RULE 2 : IF speed IS slow AND currentTurn IS closed THEN accel IS nothing; //si la curva que ve és tancada mantenim lent
+	RULE 2 : IF speed IS slow AND currentTurn IS closed THEN accel IS nothing; //si la corba que ve és tancada mantenim lent
 	RULE 3 : IF speed IS slow AND currentTurn IS NOT closed THEN accel IS hardAccel;
 	RULE 4 : IF speed IS average AND currentTurn IS closed THEN accel IS softBrake;
 	RULE 5 : IF speed IS average AND currentTurn IS medium THEN accel IS softAccel;
@@ -175,9 +175,72 @@ RULEBLOCK No1
 	RULE 13 : IF speed IS fast AND distNextTurn IS NOT close AND angle IS closed THEN accel IS hardBrake;
 
 	*/
+END_RULEBLOCK
 
+END_FUNCTION_BLOCK
 
+FUNCTION_BLOCK turn	// Block definition (there may be more than one block per file)
 
+VAR_INPUT				// Define input variables
+	actualTurnAngle : REAL; //Per saber quant hem de girar
+	distanceFromEdge : REAL; //Per evitar sortir de la corba
+END_VAR
+
+VAR_OUTPUT				// Define output variable
+	steering: REAL;       //0 no turn, 1 full turn (on directed)
+END_VAR
+
+FUZZIFY actualTurnAngle			// Fuzzify input variable 'rpm': {'low', 'medium' , 'high'}
+	/*
+	TERM hardLeftDeviated := (-180, 1) (-90, 1) (-45, 0) ;
+	TERM softLeftDeviated := (-90, 0) (-45, 1) (0, 0) ;
+	TERM noDeviation := (-45, 0) (0, 1) (45, 0);
+	TERM softRightDeviated:= (0, 0) (45, 1) (90, 0);
+	TERM hardRightDeviated:= (45, 0) (90, 1) (180, 1);
+	*/
+	
+	TERM leftDeviated := (-180, 1) (-45, 1) (0, 0) ;
+	TERM noDeviation := (-45, 0) (0, 1) (45, 0);
+	TERM rightDeviated:= (0, 0) (45, 1) (180, 1);
+	
+END_FUZZIFY
+
+FUZZIFY distanceFromEdge			// Fuzzify input variable 'accelerate': { 'no', 'yes' }
+	TERM closeToRight := (-1 ,1) (-0.8, 1) (0,0);
+	TERM centred := (-0.8, 0) (0, 1) (0.8, 0);
+	TERM closeToLeft := (0,0) (0.8, 1) (1, 1);
+END_FUZZIFY
+
+DEFUZZIFY steering			// Defuzzify output variable 'outgear' : {'shiftdown', 'keep', 'shiftup' }
+	
+	/*
+	TERM hardTurnRigth := (-1, 1) (-0.75, 1) (-0.5, 0);
+	TERM softTurnRight := (-0.75, 0) (-0.5, 1) (-0.25, 1) (0, 0); 
+	TERM nothing := (-0.25, 0) (0, 1) (0.25, 0) ;
+	TERM softTurnLeft := (0, 0) (0.25, 1) (0.5, 1) (0.75, 0);
+	TERM hardTurnLeft := (0.5, 0) (0.75, 1) (1, 1) ;
+	*/
+	
+	TERM turnRight := (-1, 1) (-0.9, 1) (0, 0) ; 
+	TERM nothing := (-0.1, 0) (0, 1) (0.1, 0) ;
+	TERM turnLeft := (0, 0) (0.9, 1) (1, 1); 
+	
+	
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgan's Law)
+	ACT : MIN;			// Use 'min' activation method
+	ACCU : MAX;			// Use 'max' accumulation method
+
+	//RULE 1 : IF distanceFromEdge IS closeToRight THEN steering IS hardTurnLeft;
+	//RULE 2 : IF distanceFromEdge IS closeToLeft THEN steering IS hardTurnRight;
+	RULE 1 : IF distanceFromEdge IS closeToLeft OR actualTurnAngle IS leftDeviated THEN steering IS turnRight;
+	RULE 2 : IF distanceFromEdge IS closeToRight OR actualTurnAngle IS rightDeviated THEN steering IS turnLeft;
+	RULE 3 : IF distanceFromEdge IS centred OR actualTurnAngle IS noDeviation THEN steering IS nothing;
+	
 END_RULEBLOCK
 
 END_FUNCTION_BLOCK

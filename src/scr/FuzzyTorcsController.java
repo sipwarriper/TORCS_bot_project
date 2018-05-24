@@ -67,7 +67,7 @@ public class FuzzyTorcsController extends Controller {
         double accel = acceleration.getVariable("accel").getValue();
 
 
-        System.out.println("steering = " + steering + "distancia a la seguent curva = "+dist + "  Acceleració = " + accel + "  Veloctiat = " + sensorModel.getSpeed() ) ;
+        //System.out.println("steering = " + steering + "distancia a la seguent curva = "+dist + "  Acceleració = " + accel + "  Veloctiat = " + sensorModel.getSpeed() ) ;
 
         if(accel < 0) {
             action.brake = -accel;
@@ -77,6 +77,9 @@ public class FuzzyTorcsController extends Controller {
             action.accelerate = accel;
             action.brake = 0;
         }
+
+        if(sensorModel.getSpeed() > 80) action.accelerate = 0;
+        else action.accelerate = 1;
 
         // Set Variables
         FunctionBlock gearBlock = fis.getFunctionBlock("gear");
@@ -89,6 +92,14 @@ public class FuzzyTorcsController extends Controller {
         action.gear = sensorModel.getGear() + gear;
         if(action.gear == 0) action.gear = 1;
         else if (action.gear > 6) action.gear = 6;
+
+
+        FunctionBlock steeringBlock = fis.getFunctionBlock("turn");
+        steeringBlock.setVariable("actualTurnAngle", (360/2*Math.PI)*sensorModel.getAngleToTrackAxis());
+        steeringBlock.setVariable("distanceFromEdge", sensorModel.getTrackPosition());
+        steeringBlock.evaluate();
+
+        action.steering=steeringBlock.getVariable("steering").getValue();
 
         return action;
     }
