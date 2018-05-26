@@ -10,7 +10,7 @@ import net.sourceforge.jFuzzyLogic.FunctionBlock;
 
 public class FuzzyTorcsController extends Controller {
 
-    public static int M = 25; //Aproximadament un registre cada 5 metres
+    public static int M = 5; //Aproximadament un registre cada 5 metres
     public static int X = 5;
 
     /*double distanceFromStart;
@@ -97,9 +97,13 @@ public class FuzzyTorcsController extends Controller {
         FunctionBlock steeringBlock = fis.getFunctionBlock("turn");
         steeringBlock.setVariable("actualTurnAngle", (360/2*Math.PI)*sensorModel.getAngleToTrackAxis());
         steeringBlock.setVariable("distanceFromEdge", sensorModel.getTrackPosition());
+        steeringBlock.setVariable("currentTurn", currentTurn.steering);
         steeringBlock.evaluate();
 
         action.steering=steeringBlock.getVariable("steering").getValue();
+        System.out.println("currentSteering = " + currentTurn.steering + " position = " + (int)sensorModel.getDistanceFromStartLine()/25 + " steering Result " + action.steering);
+        System.out.println("        distance from Edge = " + sensorModel.getTrackPosition());
+
 
         return action;
     }
@@ -133,8 +137,8 @@ public class FuzzyTorcsController extends Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        correctVector(read_registry, 150);
-        mean_vector = getMeanVector(read_registry);
+        List<Record> correctedVec = correctVector(read_registry, 150);
+        mean_vector = getMeanVector(correctedVec);
         dumpFile(mean_vector, "testing1.txt");
         accumulated_vector = getAccumulatedVector(mean_vector);
         dumpFile(accumulated_vector, "testing2.txt");
@@ -218,23 +222,42 @@ public class FuzzyTorcsController extends Controller {
     }
 
     //aquest metode fica a 0 els valors de angle i steering del vector dels 'dist' primers metres (errors de mesura)
-    static private void correctVector(List<Record> l, double dist){
-        Iterator<Record> it = l.iterator();
+    //Fica els valors del final al principi
+    //I retorna un vector amb records unificats per metres (fent mitjana)
+    static private List<Record> correctVector(List<Record> origin, double dist){
+        Iterator<Record> it = origin.iterator();
         Record r = it.next();
         while(it.hasNext() && ( r.DistanceRaced < dist) ){
             r.steering = 0;
             r.AngleToTrackAxis = 0;
             r = it.next();
         }
-        it = l.iterator();
+        it = origin.iterator();
         r=it.next();
         List<Record> r1 = new ArrayList<>();
         while(it.hasNext() && (r.DistanceFromStartLine > 1)){
             r1.add(r);
             r = it.next();
         }
-        l.removeAll(r1);
-        l.addAll(r1);
+        origin.removeAll(r1);
+        origin.addAll(r1);
+
+        List<Record> l = new ArrayList<>();
+        it = origin.iterator();
+        while(it.hasNext()){
+            r=it.next();
+            int currentDistance = (int) r.DistanceFromStartLine;
+            Record newRecord = new Record();
+            int nValues=0;
+            while (currentDistance==(int)r.DistanceFromStartLine && it.hasNext()){
+                newRecord.addValues(r);
+                nValues++;
+                r = it.next();
+            }
+            newRecord.divideValues(nValues);
+            l.add(newRecord);
+        }
+        return l;
     }
 
     static void dumpFile(List<Record> registry, String nomFitxer){

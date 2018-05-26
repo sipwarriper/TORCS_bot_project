@@ -85,13 +85,13 @@ FUZZIFY speed			// Fuzzify input variable 'speed': { 'stopped' , 'slow' , 'avera
 	TERM fast := (200, 0) (250, 1) (400, 1);
 END_FUZZIFY
 
-DEFUZZIFY accel			// Defzzzify output variable 'accel' : {'hardBrake', 'softBrake', 'nothing', 'softAccel', 'hardAccel' }
+DEFUZZIFY accel			// Defzzzify output variable 'accel' : {'closedBrake', 'softBrake', 'nothing', 'softAccel', 'closedAccel' }
 	TERM fullBrake := (-1, 1) (-0.8,0);
-	TERM hardBrake := (-1, 0) (-0.8, 1) (-0.6, 1) (-0.4, 0);
+	TERM closedBrake := (-1, 0) (-0.8, 1) (-0.6, 1) (-0.4, 0);
 	TERM softBrake := (-0.6, 0) (-0.4, 1) (-0.1,1) (0,0);
 	TERM nothing := (-0.1, 0) (0,1) (0.1, 0);
 	TERM softAccel := (0, 0) (0.1,1) (0.4, 1) (0.6, 0);
-	TERM hardAccel := (0.4, 0) (0.6, 1) (0.8,1) (1,0);
+	TERM closedAccel := (0.4, 0) (0.6, 1) (0.8,1) (1,0);
 	TERM fullAccel := (0.8,0) (1, 1);
 	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
 	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
@@ -107,15 +107,15 @@ RULEBLOCK No1
 	//màxima prioritat si la proxima corba està aprop!!
 
 	RULE 2 : IF distNextTurn IS close AND angle IS closed AND speed IS fast THEN accel IS fullBrake;
-	RULE 3 : IF distNextTurn IS close AND angle IS closed AND speed IS average THEN accel IS hardBrake;
+	RULE 3 : IF distNextTurn IS close AND angle IS closed AND speed IS average THEN accel IS closedBrake;
 	RULE 4 : IF distNextTurn IS close AND angle IS closed AND speed IS slow THEN accel IS nothing;
 
 	RULE 5 : IF distNextTurn IS close AND angle IS medium AND speed IS fast THEN accel IS fullBrake;
-	RULE 6 : IF distNextTurn IS close AND angle IS medium AND speed IS average THEN accel IS hardBrake;
+	RULE 6 : IF distNextTurn IS close AND angle IS medium AND speed IS average THEN accel IS closedBrake;
 	RULE 7 : IF distNextTurn IS close AND angle IS medium AND speed IS slow THEN accel IS softAccel;
 
 	RULE 8 : IF distNextTurn IS close AND angle IS open AND speed IS fast THEN accel IS nothing;
-	RULE 9 : IF distNextTurn IS close AND angle IS open AND speed IS average THEN accel IS hardAccel;
+	RULE 9 : IF distNextTurn IS close AND angle IS open AND speed IS average THEN accel IS closedAccel;
 	RULE 10 : IF distNextTurn IS close AND angle IS open AND speed IS slow THEN accel IS fullAccel;
 
 	//Tractar la resta de casos
@@ -125,17 +125,17 @@ RULEBLOCK No1
 	RULE 13 : IF currentTurn IS straight AND distNextTurn IS near AND angle IS closed AND speed IS NOT fast THEN accel IS fullAccel;
 
 	RULE 14 : IF currentTurn IS open AND distNextTurn IS far AND speed IS slow THEN accel IS fullAccel;
-	RULE 15 : IF currentTurn IS open AND distNextTurn IS far AND speed IS NOT slow THEN accel IS hardAccel;
+	RULE 15 : IF currentTurn IS open AND distNextTurn IS far AND speed IS NOT slow THEN accel IS closedAccel;
 	RULE 16 : IF currentTurn IS open AND distNextTurn IS near AND angle IS closed AND speed IS fast THEN accel IS nothing;
-	RULE 17 : IF currentTurn IS open AND distNextTurn IS near AND angle IS closed AND speed IS NOT fast THEN accel IS hardAccel;
+	RULE 17 : IF currentTurn IS open AND distNextTurn IS near AND angle IS closed AND speed IS NOT fast THEN accel IS closedAccel;
 
 	RULE 15 : IF currentTurn IS medium AND distNextTurn IS far AND speed IS slow THEN accel IS softAccel;
 	RULE 16 : IF currentTurn IS medium AND distNextTurn IS far AND speed IS average THEN accel IS nothing;
     RULE 17 : IF currentTurn IS medium AND distNextTurn IS far AND speed IS fast THEN accel IS softBrake;
-    RULE 18 : IF currentTurn IS medium AND distNextTurn IS near AND angle IS closed AND speed IS fast THEN accel IS hardBrake;
+    RULE 18 : IF currentTurn IS medium AND distNextTurn IS near AND angle IS closed AND speed IS fast THEN accel IS closedBrake;
     RULE 19 : IF currentTurn IS medium AND distNextTurn IS near AND angle IS closed AND speed IS NOT fast THEN accel IS softAccel;
 
-    RULE 20 : IF currentTurn IS closed AND speed IS fast THEN accel IS hardBrake;
+    RULE 20 : IF currentTurn IS closed AND speed IS fast THEN accel IS closedBrake;
     RULE 21 : IF currentTurn IS closed AND speed IS average THEN accel IS softBrake;
     RULE 22 : IF currentTurn IS closed AND speed IS slow THEN accel IS nothing;
 
@@ -148,31 +148,31 @@ RULEBLOCK No1
 /*
     RULE 1 : IF speed IS stopped THEN accel IS fullAccel;
 	RULE 2 : IF speed IS slow AND currentTurn IS closed THEN accel IS nothing; //si la corba que ve és tancada mantenim lent
-	RULE 3 : IF speed IS slow AND currentTurn IS NOT closed THEN accel IS hardAccel;
+	RULE 3 : IF speed IS slow AND currentTurn IS NOT closed THEN accel IS closedAccel;
 	RULE 4 : IF speed IS average AND currentTurn IS closed THEN accel IS softBrake;
 	RULE 5 : IF speed IS average AND currentTurn IS medium THEN accel IS softAccel;
-	RULE 6 : IF speed IS average AND currentTurn IS open THEN accel IS hardAccel;
-	RULE 6 : IF speed IS average AND currentTurn IS straight THEN accel IS hardAccel;
+	RULE 6 : IF speed IS average AND currentTurn IS open THEN accel IS closedAccel;
+	RULE 6 : IF speed IS average AND currentTurn IS straight THEN accel IS closedAccel;
 	RULE 7 : IF speed IS fast AND currentTurn IS open THEN accel IS softAccel;
-	RULE 8 : IF speed IS fast AND currentTurn IS straight AND distNextTurn IS NOT close THEN accel IS hardAccel;
-	RULE 9 : IF speed IS fast AND currentTurn IS straight AND distNextTurn IS close THEN accel IS hardBrake;
+	RULE 8 : IF speed IS fast AND currentTurn IS straight AND distNextTurn IS NOT close THEN accel IS closedAccel;
+	RULE 9 : IF speed IS fast AND currentTurn IS straight AND distNextTurn IS close THEN accel IS closedBrake;
 */
 
 /*
 
-	RULE 1 : IF speed IS stopped THEN accel IS hardAccel;
+	RULE 1 : IF speed IS stopped THEN accel IS closedAccel;
 	RULE 2 : IF speed IS slow AND currentTurn IS closed THEN accel IS nothing;
-    RULE 3 : IF speed IS slow AND currentTurn IS medium AND distNextTurn IS NOT close THEN accel IS hardAccel;
-	RULE 4 : IF speed IS slow AND currentTurn IS NOT closed AND distNextTurn IS close AND angle IS NOT closed THEN accel IS hardAccel; //revisar angle is medium
+    RULE 3 : IF speed IS slow AND currentTurn IS medium AND distNextTurn IS NOT close THEN accel IS closedAccel;
+	RULE 4 : IF speed IS slow AND currentTurn IS NOT closed AND distNextTurn IS close AND angle IS NOT closed THEN accel IS closedAccel; //revisar angle is medium
 	RULE 5 : IF speed IS slow AND currentTurn IS NOT closed AND distNextTurn IS close AND angle IS closed THEN accel IS softAccel; //canviar en funcio de comportament
 	RULE 6 : IF speed IS average AND currentTurn IS closed THEN accel IS softBrake;
 	RULE 7 : IF speed IS average AND currentTurn IS medium THEN accel IS nothing; //comprovar si es pot ficar softAccel
-	RULE 8 : IF speed IS average AND currentTurn IS open AND distNextTurn IS NOT close THEN accel IS hardAccel;
-	RULE 9 : IF speed IS average AND currentTurn IS open AND distNextTurn IS close AND angle IS NOT closed THEN accel IS hardAccel;
+	RULE 8 : IF speed IS average AND currentTurn IS open AND distNextTurn IS NOT close THEN accel IS closedAccel;
+	RULE 9 : IF speed IS average AND currentTurn IS open AND distNextTurn IS close AND angle IS NOT closed THEN accel IS closedAccel;
 	RULE 10 : IF speed IS average AND currentTurn IS open AND distNextTurn IS close AND angle IS closed THEN accel IS softAccel;
 	RULE 11 : IF speed IS fast AND currentTurn IS NOT straight AND distNextTurn IS far THEN accel IS softAccel;
-	RULE 12 : IF speed IS fast AND currentTurn IS straight AND distNextTurn IS NOT close THEN accel IS hardAccel;
-	RULE 13 : IF speed IS fast AND distNextTurn IS NOT close AND angle IS closed THEN accel IS hardBrake;
+	RULE 12 : IF speed IS fast AND currentTurn IS straight AND distNextTurn IS NOT close THEN accel IS closedAccel;
+	RULE 13 : IF speed IS fast AND distNextTurn IS NOT close AND angle IS closed THEN accel IS closedBrake;
 
 	*/
 END_RULEBLOCK
@@ -184,6 +184,7 @@ FUNCTION_BLOCK turn	// Block definition (there may be more than one block per fi
 VAR_INPUT				// Define input variables
 	actualTurnAngle : REAL; //Per saber quant hem de girar
 	distanceFromEdge : REAL; //Per evitar sortir de la corba
+	currentTurn : REAL;
 END_VAR
 
 VAR_OUTPUT				// Define output variable
@@ -192,11 +193,11 @@ END_VAR
 
 FUZZIFY actualTurnAngle			// Fuzzify input variable 'rpm': {'low', 'medium' , 'high'}
 	/*
-	TERM hardLeftDeviated := (-180, 1) (-90, 1) (-45, 0) ;
+	TERM closedLeftDeviated := (-180, 1) (-90, 1) (-45, 0) ;
 	TERM softLeftDeviated := (-90, 0) (-45, 1) (0, 0) ;
 	TERM noDeviation := (-45, 0) (0, 1) (45, 0);
 	TERM softRightDeviated:= (0, 0) (45, 1) (90, 0);
-	TERM hardRightDeviated:= (45, 0) (90, 1) (180, 1);
+	TERM closedRightDeviated:= (45, 0) (90, 1) (180, 1);
 	*/
 	
 	TERM leftDeviated := (-180, 1) (-45, 1) (0, 0) ;
@@ -205,25 +206,39 @@ FUZZIFY actualTurnAngle			// Fuzzify input variable 'rpm': {'low', 'medium' , 'h
 	
 END_FUZZIFY
 
+FUZZIFY currentTurn			// Fuzzify input variable 'angle': { 'straight' , 'open' , 'medium' , 'closed' }  //de 0 a 1.25
+
+
+	TERM closedRight := (-1.25, 1) (-0.85, 1) (-0.75, 0);
+	TERM mediumRight := (-0.85,0) (-0.75, 1) (-0.4, 1) (-0.25, 0);
+	TERM openRight := (-0.4, 0) (-0.25, 1) (-0.15, 1) (0, 0);
+    TERM straight := (-0.05, 0) (0, 1) (0.05, 0);
+	TERM openLeft := (0, 0) (0.15, 1) (0.25, 1) (0.4, 0);
+	TERM mediumLeft := (0.25, 0) (0.4, 1) (0.75, 1) (0.85,0);
+	TERM closedLeft := (0.75, 0) (0.85, 1) (1.25, 1);
+END_FUZZIFY
+
 FUZZIFY distanceFromEdge			// Fuzzify input variable 'accelerate': { 'no', 'yes' }
-	TERM closeToRight := (-1 ,1) (-0.8, 1) (0,0);
-	TERM centred := (-0.8, 0) (0, 1) (0.8, 0);
-	TERM closeToLeft := (0,0) (0.8, 1) (1, 1);
+	TERM closeToRight := (-1 ,1) (-0.75, 1) (0,0);
+	TERM centred := (-0.75, 0) (0, 1) (0.75, 0);
+	TERM closeToLeft := (0,0) (0.75, 1) (1, 1);
 END_FUZZIFY
 
 DEFUZZIFY steering			// Defuzzify output variable 'outgear' : {'shiftdown', 'keep', 'shiftup' }
 	
+
+	TERM closedTurnRight := (-1, 1) (-0.75, 1) (-0.5, 0);
+	TERM softTurnRight := (-0.75, 0) (-0.5, 1) (-0.25, 1) (-0.05, 0);
+	TERM smoothTurnRight := (-0.25, 0) (-0.05, 1) (0, 0);
+	TERM nothing := (-0.05, 0) (0, 1) (0.05, 0) ;
+	TERM smoothTurnLeft := (0, 0) (0.05, 1) (0.25, 0);
+	TERM softTurnLeft := (0.05, 0) (0.25, 1) (0.5, 1) (0.75, 0);
+	TERM closedTurnLeft := (0.5, 0) (0.75, 1) (1, 1) ;
 	/*
-	TERM hardTurnRigth := (-1, 1) (-0.75, 1) (-0.5, 0);
-	TERM softTurnRight := (-0.75, 0) (-0.5, 1) (-0.25, 1) (0, 0); 
-	TERM nothing := (-0.25, 0) (0, 1) (0.25, 0) ;
-	TERM softTurnLeft := (0, 0) (0.25, 1) (0.5, 1) (0.75, 0);
-	TERM hardTurnLeft := (0.5, 0) (0.75, 1) (1, 1) ;
-	*/
-	
 	TERM turnRight := (-1, 1) (-0.9, 1) (0, 0) ; 
 	TERM nothing := (-0.1, 0) (0, 1) (0.1, 0) ;
-	TERM turnLeft := (0, 0) (0.9, 1) (1, 1); 
+	TERM turnLeft := (0, 0) (0.9, 1) (1, 1);
+	*/
 	
 	
 	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
@@ -235,12 +250,44 @@ RULEBLOCK No1
 	ACT : MIN;			// Use 'min' activation method
 	ACCU : MAX;			// Use 'max' accumulation method
 
-	//RULE 1 : IF distanceFromEdge IS closeToRight THEN steering IS hardTurnLeft;
-	//RULE 2 : IF distanceFromEdge IS closeToLeft THEN steering IS hardTurnRight;
-	RULE 1 : IF distanceFromEdge IS closeToLeft OR actualTurnAngle IS leftDeviated THEN steering IS turnRight;
-	RULE 2 : IF distanceFromEdge IS closeToRight OR actualTurnAngle IS rightDeviated THEN steering IS turnLeft;
-	RULE 3 : IF distanceFromEdge IS centred OR actualTurnAngle IS noDeviation THEN steering IS nothing;
+	RULE 1 : IF currentTurn IS straight AND distanceFromEdge IS centred AND actualTurnAngle IS noDeviation THEN steering IS nothing;
+	RULE 2 : IF currentTurn IS straight AND distanceFromEdge IS closeToLeft AND actualTurnAngle IS NOT leftDeviated THEN steering IS nothing;
+	RULE 3 : IF currentTurn IS straight AND distanceFromEdge IS closeToLeft AND actualTurnAngle IS leftDeviated THEN steering IS smoothTurnRight;
+	RULE 4 : IF currentTurn IS straight AND distanceFromEdge IS closeToRight AND actualTurnAngle IS NOT rightDeviated THEN steering IS nothing;
+	RULE 5 : IF currentTurn IS straight AND distanceFromEdge IS closeToRight AND actualTurnAngle IS rightDeviated THEN steering IS smoothTurnLeft;
+
+    //LEFT TURNS
+
+	RULE 6 : IF currentTurn IS openLeft AND distanceFromEdge IS closeToLeft THEN steering IS nothing;
+	RULE 7 : IF currentTurn IS openLeft AND distanceFromEdge IS centred THEN steering IS smoothTurnLeft;
+	RULE 8 : IF currentTurn IS openLeft AND distanceFromEdge IS closeToRight THEN steering IS softTurnLeft;
+
+	RULE 9 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToLeft THEN steering IS nothing; //Aquí lo divertit sería afegir un conjunt que dividis, un més suau i un més heavy pero no tant com closedTurn
+	RULE 10 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred THEN steering IS softTurnLeft;//Aquí lo divertit sería afegir un conjunt que dividis, un més suau i un més heavy pero no tant com closedTurn
+	RULE 11 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToRight THEN steering IS closedTurnLeft;//Aquí lo divertit sería afegir un conjunt que dividis, un més suau i un més heavy pero no tant com closedTurn
 	
+	RULE 12 : IF currentTurn IS closedLeft AND distanceFromEdge IS NOT closeToLeft THEN steering IS closedTurnLeft;
+	RULE 13 : IF currentTurn IS closedLeft AND distanceFromEdge IS closeToLeft THEN steering IS softTurnLeft;
+
+	RULE 14 : IF currentTurn IS openRight AND distanceFromEdge IS closeToRight THEN steering IS nothing;
+	RULE 15 : IF currentTurn IS openRight AND distanceFromEdge IS centred THEN steering IS smoothTurnRight;
+	RULE 16 : IF currentTurn IS openRight AND distanceFromEdge IS closeToLeft THEN steering IS softTurnRight;
+
+	RULE 17 : IF currentTurn IS mediumRight AND distanceFromEdge IS closeToRight THEN steering IS nothing;
+	RULE 18 : IF currentTurn IS mediumRight AND distanceFromEdge IS centred THEN steering IS softTurnRight;
+	RULE 19 : IF currentTurn IS mediumRight AND distanceFromEdge IS closeToLeft THEN steering IS closedTurnRight;
+	
+	RULE 20 : IF currentTurn IS closedRight AND distanceFromEdge IS NOT closeToRight THEN steering IS closedTurnRight;
+	RULE 21 : IF currentTurn IS closedRight AND distanceFromEdge IS closeToRight THEN steering IS softTurnRight;
+
+
+	//RULE 1 : IF distanceFromEdge IS closeToRight THEN steering IS closedTurnLeft;
+	//RULE 2 : IF distanceFromEdge IS closeToLeft THEN steering IS closedTurnRight;
+	//RULE 1 : IF distanceFromEdge IS closeToLeft OR actualTurnAngle IS leftDeviated THEN steering IS turnRight;
+	//RULE 2 : IF distanceFromEdge IS closeToRight OR actualTurnAngle IS rightDeviated THEN steering IS turnLeft;
+	//RULE 3 : IF distanceFromEdge IS centred OR actualTurnAngle IS noDeviation THEN steering IS nothing;
+
+
 END_RULEBLOCK
 
 END_FUNCTION_BLOCK
