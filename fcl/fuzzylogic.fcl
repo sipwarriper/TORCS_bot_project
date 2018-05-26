@@ -211,9 +211,9 @@ FUZZIFY currentTurn			// Fuzzify input variable 'angle': { 'straight' , 'open' ,
 
 	TERM closedRight := (-1.25, 1) (-0.85, 1) (-0.75, 0);
 	TERM mediumRight := (-0.85,0) (-0.75, 1) (-0.4, 1) (-0.25, 0);
-	TERM openRight := (-0.4, 0) (-0.25, 1) (-0.15, 1) (0, 0);
-    TERM straight := (-0.05, 0) (0, 1) (0.05, 0);
-	TERM openLeft := (0, 0) (0.15, 1) (0.25, 1) (0.4, 0);
+	TERM openRight := (-0.4, 0) (-0.25, 1) (-0.15, 1) (-0.05, 0);
+    TERM straight := (-0.10, 0) (0, 1) (0.10, 0);
+	TERM openLeft := (0.05, 0) (0.15, 1) (0.25, 1) (0.4, 0);
 	TERM mediumLeft := (0.25, 0) (0.4, 1) (0.75, 1) (0.85,0);
 	TERM closedLeft := (0.75, 0) (0.85, 1) (1.25, 1);
 END_FUZZIFY
@@ -227,13 +227,13 @@ END_FUZZIFY
 DEFUZZIFY steering			// Defuzzify output variable 'outgear' : {'shiftdown', 'keep', 'shiftup' }
 	
 
-	TERM closedTurnRight := (-1, 1) (-0.75, 1) (-0.5, 0);
-	TERM softTurnRight := (-0.75, 0) (-0.5, 1) (-0.25, 1) (-0.05, 0);
-	TERM smoothTurnRight := (-0.25, 0) (-0.05, 1) (0, 0);
+	TERM closedTurnRight := (-1, 1) (-0.5, 1) (-0.20, 0);
+	TERM softTurnRight := (-0.5, 0) (-0.20, 1) (-0.15, 1) (-0.05, 0);
+	TERM smoothTurnRight := (-0.15, 0) (-0.05, 1) (0, 0);
 	TERM nothing := (-0.05, 0) (0, 1) (0.05, 0) ;
-	TERM smoothTurnLeft := (0, 0) (0.05, 1) (0.25, 0);
-	TERM softTurnLeft := (0.05, 0) (0.25, 1) (0.5, 1) (0.75, 0);
-	TERM closedTurnLeft := (0.5, 0) (0.75, 1) (1, 1) ;
+	TERM smoothTurnLeft := (0, 0) (0.05, 1) (0.15, 0);
+	TERM softTurnLeft := (0.05, 0) (0.15, 1) (0.20, 1) (0.5, 0);
+	TERM closedTurnLeft := (0.20, 0) (0.5, 1) (1, 1) ;
 	/*
 	TERM turnRight := (-1, 1) (-0.9, 1) (0, 0) ; 
 	TERM nothing := (-0.1, 0) (0, 1) (0.1, 0) ;
@@ -262,10 +262,11 @@ RULEBLOCK No1
 	RULE 7 : IF currentTurn IS openLeft AND distanceFromEdge IS centred THEN steering IS smoothTurnLeft;
 	RULE 8 : IF currentTurn IS openLeft AND distanceFromEdge IS closeToRight THEN steering IS softTurnLeft;
 
-	RULE 9 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToLeft THEN steering IS nothing; //Aquí lo divertit sería afegir un conjunt que dividis, un més suau i un més heavy pero no tant com closedTurn
-	RULE 10 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred THEN steering IS softTurnLeft;//Aquí lo divertit sería afegir un conjunt que dividis, un més suau i un més heavy pero no tant com closedTurn
-	RULE 11 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToRight THEN steering IS closedTurnLeft;//Aquí lo divertit sería afegir un conjunt que dividis, un més suau i un més heavy pero no tant com closedTurn
-	
+	RULE 9 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToLeft THEN steering IS nothing;
+	RULE 18 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred AND actualTurnAngle IS NOT leftDeviated THEN steering IS softTurnLeft;
+	RULE 19 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred AND actualTurnAngle IS leftDeviated THEN steering IS smoothTurnLeft;
+	RULE 11 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToRight THEN steering IS closedTurnLeft;
+
 	RULE 12 : IF currentTurn IS closedLeft AND distanceFromEdge IS NOT closeToLeft THEN steering IS closedTurnLeft;
 	RULE 13 : IF currentTurn IS closedLeft AND distanceFromEdge IS closeToLeft THEN steering IS softTurnLeft;
 
@@ -274,12 +275,17 @@ RULEBLOCK No1
 	RULE 16 : IF currentTurn IS openRight AND distanceFromEdge IS closeToLeft THEN steering IS softTurnRight;
 
 	RULE 17 : IF currentTurn IS mediumRight AND distanceFromEdge IS closeToRight THEN steering IS nothing;
-	RULE 18 : IF currentTurn IS mediumRight AND distanceFromEdge IS centred THEN steering IS softTurnRight;
-	RULE 19 : IF currentTurn IS mediumRight AND distanceFromEdge IS closeToLeft THEN steering IS closedTurnRight;
+	RULE 18 : IF currentTurn IS mediumRight AND distanceFromEdge IS centred AND actualTurnAngle IS NOT rightDeviated THEN steering IS softTurnRight;
+	RULE 19 : IF currentTurn IS mediumRight AND distanceFromEdge IS centred AND actualTurnAngle IS rightDeviated THEN steering IS smoothTurnRight;
+	RULE 20 : IF currentTurn IS mediumRight AND distanceFromEdge IS closeToLeft THEN steering IS closedTurnRight;
 	
-	RULE 20 : IF currentTurn IS closedRight AND distanceFromEdge IS NOT closeToRight THEN steering IS closedTurnRight;
-	RULE 21 : IF currentTurn IS closedRight AND distanceFromEdge IS closeToRight THEN steering IS softTurnRight;
+	RULE 21 : IF currentTurn IS closedRight AND distanceFromEdge IS NOT closeToRight THEN steering IS closedTurnRight;
+	RULE 22 : IF currentTurn IS closedRight AND distanceFromEdge IS closeToRight THEN steering IS softTurnRight;
 
+
+/*	TERM leftDeviated := (-180, 1) (-45, 1) (0, 0) ;
+  	TERM noDeviation := (-45, 0) (0, 1) (45, 0);
+  	TERM rightDeviated:= (0, 0) (45, 1) (180, 1);*/
 
 	//RULE 1 : IF distanceFromEdge IS closeToRight THEN steering IS closedTurnLeft;
 	//RULE 2 : IF distanceFromEdge IS closeToLeft THEN steering IS closedTurnRight;
