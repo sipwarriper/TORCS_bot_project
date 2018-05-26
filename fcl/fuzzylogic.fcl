@@ -263,16 +263,17 @@ RULEBLOCK No1
 	RULE 8 : IF currentTurn IS openLeft AND distanceFromEdge IS closeToRight THEN steering IS softTurnLeft;
 
 	RULE 9 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToLeft THEN steering IS nothing;
-	RULE 18 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred AND actualTurnAngle IS NOT leftDeviated THEN steering IS softTurnLeft;
-	RULE 19 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred AND actualTurnAngle IS leftDeviated THEN steering IS smoothTurnLeft;
-	RULE 11 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToRight THEN steering IS closedTurnLeft;
+	RULE 10 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred AND actualTurnAngle IS NOT leftDeviated THEN steering IS softTurnLeft;
+	RULE 11 : IF currentTurn IS mediumLeft AND distanceFromEdge IS centred AND actualTurnAngle IS leftDeviated THEN steering IS smoothTurnLeft;
+	RULE 12 : IF currentTurn IS mediumLeft AND distanceFromEdge IS closeToRight THEN steering IS closedTurnLeft;
 
-	RULE 12 : IF currentTurn IS closedLeft AND distanceFromEdge IS NOT closeToLeft THEN steering IS closedTurnLeft;
-	RULE 13 : IF currentTurn IS closedLeft AND distanceFromEdge IS closeToLeft THEN steering IS softTurnLeft;
+	RULE 13 : IF currentTurn IS closedLeft AND distanceFromEdge IS NOT closeToLeft THEN steering IS closedTurnLeft;
+	RULE 14 : IF currentTurn IS closedLeft AND distanceFromEdge IS closeToLeft THEN steering IS softTurnLeft;
 
-	RULE 14 : IF currentTurn IS openRight AND distanceFromEdge IS closeToRight THEN steering IS nothing;
-	RULE 15 : IF currentTurn IS openRight AND distanceFromEdge IS centred THEN steering IS smoothTurnRight;
-	RULE 16 : IF currentTurn IS openRight AND distanceFromEdge IS closeToLeft THEN steering IS softTurnRight;
+	RULE 15 : IF currentTurn IS openRight AND distanceFromEdge IS closeToRight THEN steering IS nothing;
+	//RULE 15 : IF currentTurn IS openRight AND distanceFromEdge IS centred THEN steering IS smoothTurnRight;
+	//RULE 16 : IF currentTurn IS openRight AND distanceFromEdge IS closeToLeft THEN steering IS softTurnRight;
+	RULE 16 : IF currentTurn IS openRight AND distanceFromEdge IS NOT closeToRight THEN steering IS smoothTurnRight;
 
 	RULE 17 : IF currentTurn IS mediumRight AND distanceFromEdge IS closeToRight THEN steering IS nothing;
 	RULE 18 : IF currentTurn IS mediumRight AND distanceFromEdge IS centred AND actualTurnAngle IS NOT rightDeviated THEN steering IS softTurnRight;
