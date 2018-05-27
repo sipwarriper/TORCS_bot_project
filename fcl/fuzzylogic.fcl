@@ -137,7 +137,7 @@ FUZZIFY straight			// Fuzzify input variable 'straight': { 'yes', 'no' }
 END_FUZZIFY
 
 DEFUZZIFY steering			// Defzzzify output variable 'steering' : {'turnLeft', 'nothing', 'turnRight' }
-	TERM turnRight := (-1, 1) (-0.2, 1) (-0, 0.1);
+	TERM turnRight := (-1, 1) (-0.2, 1) (-0.1, 0);
 	TERM smoothTurnRight := (-0.2, 0) (-0.1, 1) (0, 0);
 	TERM nothing := (-0.1, 0) (0,1) (0.1, 0);
 	TERM smoothTurnLeft := (0, 0) (0.1, 1) (0.15, 0);
