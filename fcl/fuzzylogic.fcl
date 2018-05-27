@@ -200,9 +200,9 @@ FUZZIFY actualTurnAngle			// Fuzzify input variable 'rpm': {'low', 'medium' , 'h
 	TERM closedRightDeviated:= (45, 0) (90, 1) (180, 1);
 	*/
 	
-	TERM leftDeviated := (-180, 1) (-45, 1) (0, 0) ;
-	TERM noDeviation := (-45, 0) (0, 1) (45, 0);
-	TERM rightDeviated:= (0, 0) (45, 1) (180, 1);
+	TERM leftDeviated := (-180, 1) (-25, 1) (0, 0) ;
+	TERM noDeviation := (-25, 0) (0, 1) (25, 0);
+	TERM rightDeviated:= (0, 0) (25, 1) (180, 1);
 	
 END_FUZZIFY
 

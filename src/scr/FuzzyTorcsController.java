@@ -102,7 +102,7 @@ public class FuzzyTorcsController extends Controller {
 
         action.steering=steeringBlock.getVariable("steering").getValue();
         System.out.println("currentSteering = " + currentTurn.steering + " position = " + (int)sensorModel.getDistanceFromStartLine()/25 + " steering Result " + action.steering);
-        System.out.println("        distance from Edge = " + sensorModel.getTrackPosition());
+        System.out.println("        distance from Edge = " + sensorModel.getTrackPosition() + " desviació = " + (360/2*Math.PI)*sensorModel.getAngleToTrackAxis());
 
 
         return action;
