@@ -56,11 +56,12 @@ public class FuzzyTorcsController extends Controller {
             if(dist < 0) dist = 1000;
             steering =  Math.abs(nextTurn.steering);
         }
-        acceleration.setVariable("distNextTurn", dist);
-        acceleration.setVariable("angle", steering);
+        acceleration.setVariable("distanceFront", sensorModel.getTrackEdgeSensors()[9]);
+        //acceleration.setVariable("angle", steering);
         acceleration.setVariable("speed", sensorModel.getSpeed());
         Record currentTurn = accumulated_vector.get((int)sensorModel.getDistanceFromStartLine()/25);
-        acceleration.setVariable("currentTurn", Math.abs(currentTurn.steering));
+        //acceleration.setVariable("currentTurn", Math.abs(currentTurn.steering));
+        acceleration.setVariable("straight", Math.abs(currentTurn.steering));
 
         acceleration.evaluate();
 
@@ -78,8 +79,8 @@ public class FuzzyTorcsController extends Controller {
             action.brake = 0;
         }
 
-        if(sensorModel.getSpeed() > 80) action.accelerate = 0;
-        else action.accelerate = 1;
+//        if(sensorModel.getSpeed() > 80) action.accelerate = 0;
+//        else action.accelerate = 1;
 
         // Set Variables
         FunctionBlock gearBlock = fis.getFunctionBlock("gear");
@@ -95,13 +96,15 @@ public class FuzzyTorcsController extends Controller {
 
 
         FunctionBlock steeringBlock = fis.getFunctionBlock("turn");
-        steeringBlock.setVariable("actualTurnAngle", (360/2*Math.PI)*sensorModel.getAngleToTrackAxis());
-        steeringBlock.setVariable("distanceFromEdge", sensorModel.getTrackPosition());
-        steeringBlock.setVariable("currentTurn", currentTurn.steering);
+        steeringBlock.setVariable("deviationAngle", (360/2*Math.PI)*sensorModel.getAngleToTrackAxis());
+        steeringBlock.setVariable("distanceEdge", sensorModel.getTrackPosition());
+        steeringBlock.setVariable("distanceFront", sensorModel.getTrackEdgeSensors()[9]);
+        steeringBlock.setVariable("straight", Math.abs(currentTurn.steering));
+        //steeringBlock.setVariable("currentTurn", currentTurn.steering);
         steeringBlock.evaluate();
 
         action.steering=steeringBlock.getVariable("steering").getValue();
-        System.out.println("currentSteering = " + currentTurn.steering + " position = " + (int)sensorModel.getDistanceFromStartLine()/25 + " steering Result " + action.steering);
+        System.out.println("currentSteering = " /*+ currentTurn.steering*/ + " position = " + (int)sensorModel.getDistanceFromStartLine()/25 + " steering Result " + action.steering);
         System.out.println("        distance from Edge = " + sensorModel.getTrackPosition() + " desviació = " + (360/2*Math.PI)*sensorModel.getAngleToTrackAxis());
 
 
