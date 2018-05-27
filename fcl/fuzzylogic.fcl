@@ -115,11 +115,9 @@ VAR_OUTPUT				// Define output variable
 END_VAR
 
 FUZZIFY deviationAngle			// Fuzzify input variable 'deviationAngle': {'left', 'no' , 'right'}
-    TERM tooLeft := (-180, 1) (-50, 1) (-25, 0)
-	TERM left := (-25, 0) (-15, 1) (0, 0);
-	TERM no := (-50, 0) (0, 1) (50, 0);
-	TERM right := (0, 0) (15, 1) (25, 0);
-	TERM tooRight := (25, 0) (50, 1) (180, 1);
+	TERM left := (-180, 1) (-45, 1) (0, 0);
+	TERM no := (-45, 0) (0, 1) (45, 0);
+	TERM right := (0, 0) (45, 1) (180, 1);
 END_FUZZIFY
 
 FUZZIFY distanceEdge			// Fuzzify input variable 'distanceEdge': { 'left', 'center', 'right' }
@@ -139,11 +137,11 @@ FUZZIFY straight			// Fuzzify input variable 'straight': { 'yes', 'no' }
 END_FUZZIFY
 
 DEFUZZIFY steering			// Defzzzify output variable 'steering' : {'turnLeft', 'nothing', 'turnRight' }
-	TERM turnRight := (-1, 1) (-0.30, 1) (-0, 0.2);
-	TERM smoothTurnRight := (-0.30, 0) (-0.2, 1) (-0.1, 1) (0, 0);
+	TERM turnRight := (-1, 1) (-0.2, 1) (-0, 0.1);
+	TERM smoothTurnRight := (-0.2, 0) (-0.1, 1) (0, 0);
 	TERM nothing := (-0.1, 0) (0,1) (0.1, 0);
-	TERM smoothTurnLeft := (0, 0) (0.1, 1) (0.30, 0);
-	TERM turnLeft := (0.2, 0) (0.3, 1) (1, 1);
+	TERM smoothTurnLeft := (0, 0) (0.1, 1) (0.15, 0);
+	TERM turnLeft := (0.1, 0) (0.2, 1) (1, 1);
 	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
 	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
 END_DEFUZZIFY
@@ -153,9 +151,29 @@ RULEBLOCK No1
 	ACT : MIN;			// Use 'min' activation method
 	ACCU : MAX;			// Use 'max' accumulation method
 
-    RULE 1 : IF straight IS yes AND distanceEdge IS no THEN steering IS nothing;
-    RULE 2 : IF straight IS yes AND distanceEdge IS left THEN steering IS smoothTurnRight;
-    RULE 3 : IF straight IS yes AND distanceEdge IS right THEN steering IS smoothTurnLeft;
+/*
+    RULE 1 : IF straight IS yes AND distanceEdge IS left AND distanceFront IS far THEN steering IS smoothTurnRight;
+    RULE 2 : IF straight IS yes AND distanceEdge IS right AND distanceFront IS far THEN steering IS smoothTurnLeft;
+    RULE 3 : IF straight IS yes AND distanceEdge IS center AND distanceFront IS far THEN steering IS nothing;
+    RULE 4 : IF straight IS yes AND distanceFront IS near THEN steering IS nothing;
+
+    //RULE 4 : IF straight IS yes AND distanceEdge IS left AND distanceFront IS near THEN steering IS turnRight;
+    //RULE 5 : IF straight IS yes AND distanceEdge IS right AND distanceFront IS near THEN steering IS turnLeft;
+    //RULE 6 : IF straight IS yes AND distanceEdge IS center AND distanceFront IS near THEN steering IS nothing;
+
+    RULE 7 : IF straight IS yes AND deviationAngle IS left THEN steering IS smoothTurnRight;
+    RULE 8 : IF straight IS yes AND deviationAngle IS no THEN steering IS nothing;
+    RULE 9 : IF straight IS yes AND deviationAngle IS right THEN steering IS smoothTurnLeft;
+
+    RULE 10 : IF straight IS no AND distanceEdge IS left AND deviationAngle IS left THEN steering IS smoothTurnRight;
+    RULE 10 : IF straight IS no AND distanceEdge IS left AND deviationAngle IS right THEN steering IS smoothTurnRight;
+    RULE 11 : IF straight IS no AND distanceEdge IS right THEN steering IS turnLeft;
+    RULE 12 : IF straight IS no AND distanceEdge IS center THEN steering IS nothing;
+*/
+
+    RULE 1 : IF straight IS yes AND deviationAngle IS no THEN steering IS nothing;
+    RULE 2 : IF straight IS yes AND deviationAngle IS left THEN steering IS smoothTurnRight;
+    RULE 3 : IF straight IS yes AND deviationAngle IS right THEN steering IS smoothTurnLeft;
     RULE 2 : IF straight IS no AND distanceFront IS near AND distanceEdge IS left THEN steering IS turnRight;
     RULE 3 : IF straight IS no AND distanceFront IS near AND distanceEdge IS center THEN steering IS nothing;
     RULE 4 : IF straight IS no AND distanceFront IS near AND distanceEdge IS right THEN steering IS turnLeft;
