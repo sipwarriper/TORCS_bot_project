@@ -62,8 +62,8 @@ VAR_OUTPUT				// Define output variable
 END_VAR
 
 FUZZIFY speed			// Fuzzify input variable 'speed': {'slow', 'average' , 'fast'}
-	TERM slow := (0, 1) (60, 1) (90, 0);
-	TERM average:= (60, 0) (90, 1) (130, 1) (160, 0);
+	TERM slow := (0, 1) (70, 1) (100, 0);
+	TERM average:= (60, 0) (100, 1) (130, 1) (160, 0);
 	TERM fast:= (130, 0) (160, 1) (300, 1);
 END_FUZZIFY
 
@@ -127,8 +127,8 @@ FUZZIFY distanceEdge			// Fuzzify input variable 'distanceEdge': { 'left', 'cent
 END_FUZZIFY
 
 FUZZIFY distanceFront			// Fuzzify input variable 'distanceFront': { 'near', 'far' }
-	TERM near := (0, 1) (60, 1) (120, 0);
-	TERM far := (60, 0) (120, 1) (200, 1);
+	TERM near := (0, 1) (60, 1) (100, 0);
+	TERM far := (60, 0) (100, 1) (200, 1);
 END_FUZZIFY
 
 FUZZIFY straight			// Fuzzify input variable 'straight': { 'yes', 'no' }
